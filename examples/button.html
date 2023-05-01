@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="src/silk.js"></script>
+  <title>Button Example</title>
+</head>
+<body>
+  <script>
+      var state = silk.createSignal(false);
+
+      var buttonPressed = function() {
+        return state.get() ? "On" : "Off";
+      };
+
+      var toggle = function() {
+        state.set(!state.get());
+      };
+
+      var app = silk.h(
+        "div",
+        {},
+        silk.h("h1", { id: "buttonState" }, buttonPressed),
+        silk.h("button", { onclick: "toggle();" }, "Press me")
+      );
+
+      document.body.appendChild(app);
+  </script>
+</body>
+</html>

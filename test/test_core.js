@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { createSignal, createEffect, effectsMap } = require('../src/main.js');
+const { createSignal, createEffect } = require('../src/silk.js');
 
 describe('Test createSignal', function() {
   it('should create a signal with initial value', function() {
@@ -74,10 +74,10 @@ describe('Test multiple effects', function() {
       var result4;
    
       createEffect(function (){
-            createEffect(function(set) {console.log("effect1"); if (!set) {result1 = counter.get();}});
-            createEffect(function(set) {console.log("effect2"); if (!set) {result2 = counter.get();}});
-            createEffect(function(set) {console.log("effect3"); if (!set) {result3 = counter1.get();}});
-            createEffect(function(set) {console.log("effect4"); if (!set) {result4 = counter1.get();}});
+            createEffect(function(set) {result1 = counter.get();});
+            createEffect(function(set) {result2 = counter.get();});
+            createEffect(function(set) {result3 = counter1.get();});
+            createEffect(function(set) {result4 = counter1.get();});
         });
   
       assert.strictEqual(result1, 0);
@@ -85,11 +85,17 @@ describe('Test multiple effects', function() {
       assert.strictEqual(result3, 0);
       assert.strictEqual(result4, 0);
 
-      console.log("Setting");
       counter.set(23);
-      counter1.set(23);
-
       assert.strictEqual(result1, 23);
       assert.strictEqual(result2, 23);
+      assert.strictEqual(result3, 0);
+      assert.strictEqual(result4, 0);
+
+      counter1.set(42);
+      assert.strictEqual(result1, 23);
+      assert.strictEqual(result2, 23);
+      assert.strictEqual(result3, 42);
+      assert.strictEqual(result4, 42);
+
     });
 });

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../src/silk.js"></script>
+  <title>Font Example</title>
+  <style>
+    .center-text {
+      text-align: center;
+    }
+    .large-font {
+      font-size: 32px;
+    }
+    .red-color {
+      color: red;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <script>
+      var fontClass = silk.createSignal("large-font");
+
+      var updateFontClass = function() {
+        return fontClass.get();
+      };
+
+      var setLargeFont = function() {
+        fontClass.set("large-font");
+      };
+
+      var setRedColor = function() {
+        fontClass.set("red-color");
+      };
+
+      var app = silk.h(
+        "div",
+        {},
+        silk.h("h1", { class: "center-text" }, "Font Example"),
+        silk.h("p", { class: "center-text" }, "Click the buttons below to change the font properties."),
+        silk.h("div", { class: "button-container" },
+          silk.h("button", { onclick: "setLargeFont();" }, "Large Font"),
+          silk.h("button", { onclick: "setRedColor();" }, "Red Color")
+        ),
+        silk.h("div", { class: "font-box" },
+          silk.h("p", { class: updateFontClass }, "This text will change based on the selected font property.")
+        )
+      );
+
+      document.body.appendChild(app);
+  </script>
+</body>
+</html>

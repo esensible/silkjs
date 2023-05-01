@@ -1,6 +1,6 @@
 const { JSDOM } = require("jsdom");
 const assert = require('assert');
-const { createSignal, h, effectsMap} = require('../src/main.js');
+const { createSignal, h} = require('../src/silk.js');
 
 describe('Test DOM generation', function() {
   it('should generate the correct DOM structure', function() {
@@ -31,13 +31,23 @@ describe('Test DOM generation', function() {
       '<div data="0" class="bongo"><h1 class="hello"></h1><div></div></div><div>0</div>'
     );
 
-    console.log(effectsMap);
     count.set(23);
-    count.set(84);
     assert.strictEqual(
         outerDiv.innerHTML,
         '<div data="23" class="bongo"><h1 class="hello"></h1><div></div></div><div>23</div>'
         );
+
+    count.set(42);
+    assert.strictEqual(
+    outerDiv.innerHTML,
+    '<div data="42" class="bongo"><h1 class="hello"></h1><div></div></div><div>42</div>'
+    );
+
+    state.set(true);
+    assert.strictEqual(
+      outerDiv.innerHTML,
+      '<div data="42" class="bongo"><div class="hello"></div><div></div></div><div>42</div>'
+      );
   
   });
 });

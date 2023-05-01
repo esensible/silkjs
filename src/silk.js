@@ -1,33 +1,36 @@
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-
-const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
-const document = dom.window.document;
-
+(function () {
 var activeEffect = null;
 var activeEffectId = null;
-var effectsMap = {};
+var effectFlushers = {};
+
+var docRef = typeof document !== "undefined" ? document : null;
+if (docRef === null) {
+    const jsdom = require("jsdom");
+    const { JSDOM } = jsdom;
+
+    const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+    docRef = dom.window.document;
+}
 
 function createSignal(initialValue) {
     var value = initialValue;
     var subscribers = [];
   
     function addSubscriber(subscriber, subscriberId) {
-      console.log("Adding ", subscriberId, subscriber)
       if (subscribers.indexOf(subscriber) === -1) {
         subscribers.push(subscriber);
   
         // Add a function to remove this signal from the effect's subscriptions
-        if (!effectsMap[subscriberId]) {
-          effectsMap[subscriberId] = [];
+        if (!effectFlushers[subscriberId]) {
+          effectFlushers[subscriberId] = [];
         }
         var unsubscribe = function() {
-          var index = subscribers.indexOf(subscriber);
+          var index = effectFlushers[subscriberId].indexOf(subscriber);
           if (index !== -1) {
             subscribers.splice(index, 1);
           }
         };
-        effectsMap[subscriberId].push(unsubscribe);
+        effectFlushers[subscriberId].push(unsubscribe);
       }
     }
   
@@ -39,7 +42,7 @@ function createSignal(initialValue) {
   
     return {
       get: function() {
-        if (activeEffectId) {
+        if (activeEffect) {
           addSubscriber(activeEffect, activeEffectId);
         }
         return value;
@@ -65,12 +68,12 @@ function createEffect(callback) {
 
   function wrappedEffect() {
     // Remove previous subscriptions for this effect
-    if (effectsMap[effectId]) {
-      effectsMap[effectId].forEach(function(unsubscribe) {
+    if (effectFlushers[effectId]) {
+      effectFlushers[effectId].forEach(function(unsubscribe) {
         unsubscribe();
       });
     }
-    effectsMap[effectId] = [];
+    effectFlushers[effectId] = [];
 
     // Save the current activeEffect and set it to the new wrapped effect
     var previousActiveEffect = activeEffect;
@@ -82,20 +85,25 @@ function createEffect(callback) {
     callback();
 
     // If there were any subscriptions created by this effect, add a cleanup function
-    if (effectsMap[effectId].length > 0) {
+    if (effectFlushers[effectId].length > 0) {
       // If there's a previousActiveEffect, add a cleanup function for the current effect
       if (previousActiveEffectId) {
+
         var cleanupCurrentEffect = function() {
-          effectsMap[effectId].forEach(function(unsubscribe) {
-            unsubscribe();
-          });
-          delete effectsMap[effectId];
-        };
-        effectsMap[previousActiveEffectId].push(cleanupCurrentEffect);
+                    if (effectFlushers[effectId]) {
+                        effectFlushers[effectId].forEach(function(unsubscribe) {
+                            unsubscribe();
+                        });
+                        delete effectFlushers[effectId];
+                    } else {
+                        console.log("effectFlushers[", effectId, "] is empty")
+                    }
+                };
+        effectFlushers[previousActiveEffectId].push(cleanupCurrentEffect);
       }
     } else {
       // If no subscriptions were created, remove the wrappedEffect from the effectsMap
-      delete effectsMap[effectId];
+      delete effectFlushers[effectId];
     }
 
     // Restore the previous activeEffect
@@ -111,12 +119,12 @@ function h(tag, attributes) {
     if (typeof tag === "function") {
         return function() { return tag(attributes, Array.prototype.slice.call(arguments, 2)); }
     }
-    var element = document.createElement(tag);
+    var element = docRef.createElement(tag);
   
     // Set attributes
     for (var key in attributes) {
         // hack for on prefix to handle event setting
-        if (typeof attributes[key] === "function" && !key.startsWith("on")) {
+        if (typeof attributes[key] === "function") {
             (function (key, fn) {
                 createEffect(function() {
                     element.setAttribute(key, fn());
@@ -147,16 +155,26 @@ function h(tag, attributes) {
             });
         })(child, i-2);
       } else {
-        element.appendChild(child);
+        if (typeof child === "string") {
+          element.appendChild(document.createTextNode(child));
+        } else {
+          element.appendChild(child);
+        }
       }
     }
   
     return element;
   }
 
-module.exports = {
+  var moduleExports = {
     createEffect: createEffect,
     createSignal: createSignal,
     h: h,
-    effectsMap: effectsMap,
-  };
+  };  
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = moduleExports;
+  } else if (typeof window !== "undefined") {
+    window.silk = moduleExports;
+  }
+})();
