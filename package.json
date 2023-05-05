@@ -1,30 +1,18 @@
 {
   "name": "silkjs",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/main.js",
-  "directories": {
-    "test": "tests"
-  },
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Lightweight reactive framework in ES5 for Kindle browsers, inspired by SolidJS.",
+  "author": "Andrew Beck",
+  "license": "MIT",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "vite build"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "chai": "^4.3.7",
-    "jsdom": "^21.1.1",
-    "mocha": "^10.2.0"
+    "test": "mocha --require esm \"test/test_*.js\""
   },
   "devDependencies": {
-    "@babel/core": "^7.21.5",
-    "@babel/preset-env": "^7.21.5",
-    "babel-loader": "^9.1.2",
-    "html-webpack-plugin": "^5.5.1",
-    "http-server": "^14.1.1",
-    "vite": "^4.3.3",
-    "webpack": "^5.81.0",
-    "webpack-cli": "^5.0.2"
+    "chai": "^4.3.7",
+    "esm": "^3.2.25",
+    "jsdom": "^21.1.1",
+    "mocha": "^10.2.0"
   }
 }

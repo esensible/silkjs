@@ -1,53 +1,48 @@
-const { JSDOM } = require("jsdom");
-const assert = require('assert');
-const { createSignal, h} = require('../src/silk.js');
+import { strictEqual } from 'assert';
+import { createSignal, h, setDocument} from '../src/index.js';
+import { JSDOM } from 'jsdom';
 
-describe('Test DOM generation', function() {
-  it('should generate the correct DOM structure', function() {
-    const count = createSignal(0);
-    const state = createSignal(false);
+const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+setDocument(dom.window.document);
 
-    const CopThis = function(props) {
-      if (state.get()) {
-        return h("div", props);
-      }
-      return h("h1", props);
-    };
+describe('Test DOM generation', () => {
+  it('should generate the correct DOM structure', () => {
+    const [count, setCount] = createSignal(0);
+    const [state, setState] = createSignal(false);
 
-    const CopThat = function(props) {
-      return h("div", props);
-    };
+    const CopThis = (props) => state() ? h("div", props) : h("h1", props);
+
+    const CopThat = (props) => h("div", props);
 
     const outerDiv = h(
       "div",
       {},
-      h("div", { data: count.get, "class": "bongo" }, h(CopThis, {"class": "hello"}), h(CopThat, {})),
-      h("div", {}, count.get)
+      h("div", { data: count, "class": "bongo" }, h(CopThis, { "class": "hello" }), h(CopThat, {})),
+      h("div", {}, count)
     );
 
     // Assert the resulting DOM structure
-    assert.strictEqual(
-        outerDiv.innerHTML,
+    strictEqual(
+      outerDiv.innerHTML,
       '<div data="0" class="bongo"><h1 class="hello"></h1><div></div></div><div>0</div>'
     );
 
-    count.set(23);
-    assert.strictEqual(
-        outerDiv.innerHTML,
-        '<div data="23" class="bongo"><h1 class="hello"></h1><div></div></div><div>23</div>'
-        );
-
-    count.set(42);
-    assert.strictEqual(
-    outerDiv.innerHTML,
-    '<div data="42" class="bongo"><h1 class="hello"></h1><div></div></div><div>42</div>'
+    setCount(23);
+    strictEqual(
+      outerDiv.innerHTML,
+      '<div data="23" class="bongo"><h1 class="hello"></h1><div></div></div><div>23</div>'
     );
 
-    state.set(true);
-    assert.strictEqual(
+    setCount(42);
+    strictEqual(
+      outerDiv.innerHTML,
+      '<div data="42" class="bongo"><h1 class="hello"></h1><div></div></div><div>42</div>'
+    );
+
+    setState(true);
+    strictEqual(
       outerDiv.innerHTML,
       '<div data="42" class="bongo"><div class="hello"></div><div></div></div><div>42</div>'
-      );
-  
+    );
   });
 });

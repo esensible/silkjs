@@ -1,4 +1,4 @@
-# silkjs
+# SilkJs
 
 SilkJS is client side implementation of [SilkFlow](https://github.com/esensible/silkflow). Both are fine grained reactive libraries targetting the Kindle (specifically the PaperWhite).
 

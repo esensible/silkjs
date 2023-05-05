@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../src/silk.js"></script>
   <title>Font Example</title>
   <style>
     .center-text {
@@ -23,32 +19,30 @@
   </style>
 </head>
 <body>
-  <script>
-      var fontClass = silk.createSignal("large-font");
+  <script type="module">
+      import { createSignal, h} from '../src/index.js';
 
-      var updateFontClass = function() {
-        return fontClass.get();
+      const [fontClass, setFontClass] = createSignal("large-font");
+
+      const setLargeFont = () => {
+        setFontClass("large-font");
       };
 
-      var setLargeFont = function() {
-        fontClass.set("large-font");
+      const setRedColor = () => {
+        setFontClass("red-color");
       };
 
-      var setRedColor = function() {
-        fontClass.set("red-color");
-      };
-
-      var app = silk.h(
+      var app = h(
         "div",
         {},
-        silk.h("h1", { class: "center-text" }, "Font Example"),
-        silk.h("p", { class: "center-text" }, "Click the buttons below to change the font properties."),
-        silk.h("div", { class: "button-container" },
-          silk.h("button", { onclick: "setLargeFont();" }, "Large Font"),
-          silk.h("button", { onclick: "setRedColor();" }, "Red Color")
+        h("h1", { class: "center-text" }, "Font Example"),
+        h("p", { class: "center-text" }, "Click the buttons below to change the font properties."),
+        h("div", { class: "button-container" },
+          h("button", { onclick: setLargeFont }, "Large Font"),
+          h("button", { onclick: setRedColor }, "Red Color")
         ),
-        silk.h("div", { class: "font-box" },
-          silk.h("p", { class: updateFontClass }, "This text will change based on the selected font property.")
+        h("div", { class: "font-box" },
+        h("p", { class: fontClass }, "This text will change based on the selected font property.")
         )
       );
 

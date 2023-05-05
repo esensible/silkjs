@@ -1,45 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../src/silk.js"></script>
   <title>Clock Example</title>
 </head>
 <body>
-  <script>
-    var clockSignal = silk.createSignal(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).replace(/^0/, ""));
-    var counterSignal = silk.createSignal(0);
+  <script type="module">
+    import { createSignal, h} from '../src/index.js';
 
-    function updateClock() {
-      return clockSignal.get();
-    }
+    const timeString = () => {
+      const currentTime = new Date();
+      return currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).replace(/^0/, "");
+    };
 
-    function updateCounter() {
-      return counterSignal.get();
-    }
+    const [clock, setClock] = createSignal(timeString());
+    const [counter, setCounter] = createSignal(0);
 
-    function clockTask() {
-      setInterval(function() {
-        var currentTime = new Date();
-        clockSignal.set(currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).replace(/^0/, ""));
-      }, 1000);
-    }
+    setInterval(() => {
+      setClock(timeString());
+    }, 1000);
 
-    function counterTask() {
-      setInterval(function() {
-        counterSignal.set(counterSignal.get() + 1);
-      }, 200);
-    }
+    setInterval(() => {
+      setCounter(counter() + 1);
+    }, 200);
 
-    clockTask();
-    counterTask();
-
-    var app = silk.h(
+    const app = h(
       "div",
       {},
-      silk.h("h1", {}, silk.h("span", {}, "Clock: "), updateClock),
-      silk.h("h1", {}, silk.h("span", {}, "Counter: "), updateCounter)
+      h("h1", {}, () => ("Clock: " + clock())),
+      h("h1", {}, () => ("Counter: " + counter()))
     );
 
     document.body.appendChild(app);

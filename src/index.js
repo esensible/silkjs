@@ -1,59 +1,56 @@
-(function () {
 var activeEffect = null;
 var activeEffectId = null;
 var effectFlushers = {};
 
 var docRef = typeof document !== "undefined" ? document : null;
-if (docRef === null) {
-    const jsdom = require("jsdom");
-    const { JSDOM } = jsdom;
-
-    const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
-    docRef = dom.window.document;
+// Dodgy hack for testing under node
+export function setDocument(value) {
+  docRef = value;
 }
 
 function createSignal(initialValue) {
-    var value = initialValue;
-    var subscribers = [];
-  
-    function addSubscriber(subscriber, subscriberId) {
-      if (subscribers.indexOf(subscriber) === -1) {
-        subscribers.push(subscriber);
-  
-        // Add a function to remove this signal from the effect's subscriptions
-        if (!effectFlushers[subscriberId]) {
-          effectFlushers[subscriberId] = [];
-        }
-        var unsubscribe = function() {
-          var index = effectFlushers[subscriberId].indexOf(subscriber);
-          if (index !== -1) {
-            subscribers.splice(index, 1);
-          }
-        };
-        effectFlushers[subscriberId].push(unsubscribe);
+  let value = initialValue;
+  let subscribers = [];
+
+  function addSubscriber(subscriber, subscriberId) {
+    if (subscribers.indexOf(subscriber) === -1) {
+      subscribers.push(subscriber);
+
+      // Add a function to remove this signal from the effect's subscriptions
+      if (!effectFlushers[subscriberId]) {
+        effectFlushers[subscriberId] = [];
       }
-    }
-  
-    function notifySubscribers() {
-      for (var i = 0; i < subscribers.length; i++) {
-        subscribers[i]();
-      }
-    }
-  
-    return {
-      get: function() {
-        if (activeEffect) {
-          addSubscriber(activeEffect, activeEffectId);
+      let unsubscribe = () => {
+        let index = effectFlushers[subscriberId].indexOf(subscriber);
+        if (index !== -1) {
+          subscribers.splice(index, 1);
         }
-        return value;
-      },
-      set: function(newValue) {
-        value = newValue;
-        notifySubscribers();
-      },
-      subscribers: subscribers
-    };
+      };
+      effectFlushers[subscriberId].push(unsubscribe);
+    }
+  }
+
+  function notifySubscribers() {
+    for (let i = 0; i < subscribers.length; i++) {
+      subscribers[i]();
+    }
+  }
+
+  function get() {
+    if (activeEffect) {
+      addSubscriber(activeEffect, activeEffectId);
+    }
+    return value;
+  }
+
+  function set(newValue) {
+    value = newValue;
+    notifySubscribers();
+  }
+
+  return [get, set];
 }
+
 
 function generateUUID() {
     var uuid = '';
@@ -125,11 +122,16 @@ function h(tag, attributes) {
     for (var key in attributes) {
         // hack for on prefix to handle event setting
         if (typeof attributes[key] === "function") {
+          if (key.indexOf("on") === 0) {
+            var event = key.slice(2).toLowerCase();
+            element.addEventListener(event, attributes[key]);
+          } else {
             (function (key, fn) {
                 createEffect(function() {
                     element.setAttribute(key, fn());
                 });
             })(key, attributes[key]);
+          }
         } else {
             element.setAttribute(key, attributes[key]);
         }
@@ -166,15 +168,8 @@ function h(tag, attributes) {
     return element;
   }
 
-  var moduleExports = {
-    createEffect: createEffect,
-    createSignal: createSignal,
-    h: h,
-  };  
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = moduleExports;
-  } else if (typeof window !== "undefined") {
-    window.silk = moduleExports;
-  }
-})();
+export {
+  createEffect,
+  createSignal,
+  h,
+};
