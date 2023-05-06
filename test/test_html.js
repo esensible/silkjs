@@ -2,11 +2,11 @@ import { strictEqual } from 'assert';
 import { createSignal, h, setDocument} from '../src/index.js';
 import { JSDOM } from 'jsdom';
 
-const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
-setDocument(dom.window.document);
-
 describe('Test DOM generation', () => {
   it('should generate the correct DOM structure', () => {
+    const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+    setDocument(dom.window.document);
+    
     const [count, setCount] = createSignal(0);
     const [state, setState] = createSignal(false);
 
@@ -44,5 +44,28 @@ describe('Test DOM generation', () => {
       outerDiv.innerHTML,
       '<div data="42" class="bongo"><div class="hello"></div><div></div></div><div>42</div>'
     );
+  });
+});
+
+describe('Test DOM components', () => {
+  it('should support nested, pass through DOM components', () => {
+    const dom = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`);
+    setDocument(dom.window.document);
+ 
+    const Component = () => (
+      h("div")
+    );
+    
+    const Outer = () => (
+      h(Component)
+    )
+
+    const outerDiv = h("div", {}, h(Outer));
+
+    strictEqual(
+      outerDiv.innerHTML,
+      '<div></div>'
+    );
+
   });
 });

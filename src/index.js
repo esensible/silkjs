@@ -143,7 +143,11 @@ function h(tag, attributes) {
       if (typeof child === "function") {
         (function (child, idx) {
             createEffect(function() {
-                var newValue = child();
+                var newValue = child;
+                // This handles nested custom components
+                while (typeof newValue === "function") {
+                  newValue = newValue()
+                }
                 if (typeof newValue === "object") {
                     if (idx >= element.children.length) {
                         element.appendChild(newValue);
