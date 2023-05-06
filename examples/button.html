@@ -4,7 +4,7 @@
 </head>
 <body>
   <script type="module">
-      import { createSignal, h} from '../src/index.js';
+      import { createSignal, createElement} from '../src/index.js';
 
       const [state, setState] = createSignal(false);
 
@@ -12,11 +12,11 @@
 
       const toggle = () => setState(!state());
 
-      const app = h(
+      const app = createElement(
         "div",
         {},
-        h("h1", {}, buttonPressed),
-        h("button", { onclick: toggle }, "Press me")
+        createElement("h1", {}, buttonPressed),
+        createElement("button", { onclick: toggle }, "Press me")
       );
 
       document.body.appendChild(app);

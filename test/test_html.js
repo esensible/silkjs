@@ -1,5 +1,5 @@
 import { strictEqual } from 'assert';
-import { createSignal, h, setDocument} from '../src/index.js';
+import { createSignal, createElement, setDocument} from '../src/index.js';
 import { JSDOM } from 'jsdom';
 
 describe('Test DOM generation', () => {
@@ -10,15 +10,15 @@ describe('Test DOM generation', () => {
     const [count, setCount] = createSignal(0);
     const [state, setState] = createSignal(false);
 
-    const CopThis = (props) => state() ? h("div", props) : h("h1", props);
+    const CopThis = (props) => state() ? createElement("div", props) : createElement("h1", props);
 
-    const CopThat = (props) => h("div", props);
+    const CopThat = (props) => createElement("div", props);
 
-    const outerDiv = h(
+    const outerDiv = createElement(
       "div",
       {},
-      h("div", { data: count, "class": "bongo" }, h(CopThis, { "class": "hello" }), h(CopThat, {})),
-      h("div", {}, count)
+      createElement("div", { data: count, "class": "bongo" }, createElement(CopThis, { "class": "hello" }), createElement(CopThat, {})),
+      createElement("div", {}, count)
     );
 
     // Assert the resulting DOM structure
@@ -53,14 +53,14 @@ describe('Test DOM components', () => {
     setDocument(dom.window.document);
  
     const Component = () => (
-      h("div")
+      createElement("div")
     );
     
     const Outer = () => (
-      h(Component)
+      createElement(Component)
     )
 
-    const outerDiv = h("div", {}, h(Outer));
+    const outerDiv = createElement("div", {}, createElement(Outer));
 
     strictEqual(
       outerDiv.innerHTML,

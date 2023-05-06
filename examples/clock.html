@@ -4,7 +4,7 @@
 </head>
 <body>
   <script type="module">
-    import { createSignal, h} from '../src/index.js';
+    import { createSignal, createElement} from '../src/index.js';
 
     const timeString = () => {
       const currentTime = new Date();
@@ -22,11 +22,11 @@
       setCounter(counter() + 1);
     }, 200);
 
-    const app = h(
+    const app = createElement(
       "div",
       {},
-      h("h1", {}, () => ("Clock: " + clock())),
-      h("h1", {}, () => ("Counter: " + counter()))
+      createElement("h1", {}, () => ("Clock: " + clock())),
+      createElement("h1", {}, () => ("Counter: " + counter()))
     );
 
     document.body.appendChild(app);

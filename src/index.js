@@ -111,7 +111,7 @@ function createEffect(callback) {
   return wrappedEffect();
 }
 
-function h(tag, attributes) {
+function createElement(tag, attributes) {
 
     if (typeof tag === "function") {
         return function() { return tag(attributes, Array.prototype.slice.call(arguments, 2)); }
@@ -132,7 +132,13 @@ function h(tag, attributes) {
                 });
             })(key, attributes[key]);
           }
-        } else {
+        } else if (key === 'style' && typeof attributes[key] === 'object') {
+          const styleObject = attributes[key];
+          for (const styleKey in styleObject) {
+            element.style[styleKey] = styleObject[styleKey];
+          }
+        }
+        else {
             element.setAttribute(key, attributes[key]);
         }
     }
@@ -175,5 +181,5 @@ function h(tag, attributes) {
 export {
   createEffect,
   createSignal,
-  h,
+  createElement,
 };
