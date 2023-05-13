@@ -1,6 +1,7 @@
 var activeEffect = null;
 var activeEffectId = null;
 var effectFlushers = {};
+var signalMap = {};
 
 var docRef = typeof document !== "undefined" ? document : null;
 // Dodgy hack for testing under node
@@ -8,7 +9,7 @@ export function setDocument(value) {
   docRef = value;
 }
 
-function createSignal(initialValue) {
+function createSignal(initialValue, key) {
   let value = initialValue;
   let subscribers = [];
 
@@ -43,14 +44,33 @@ function createSignal(initialValue) {
     return value;
   }
 
-  function set(newValue) {
-    value = newValue;
-    notifySubscribers();
+  function set(newValue, force=false) {
+    if (force || value !== newValue) {
+      value = newValue;
+      notifySubscribers();
+    }
+  }
+
+  if (typeof key !== "undefined") {
+    signalMap[key] = set
   }
 
   return [get, set];
 }
 
+function setAll(updates, failHard = false) {
+  for (const key in updates) {
+    if (signalMap.hasOwnProperty(key)) {
+      signalMap[key](updates[key]);
+    } else {
+      if (failHard) {
+        throw new Error(`Key "${key}" not found in signalMap.`);
+      } else {
+        console.warn(`Key "${key}" not found in signalMap.`);
+      }
+    }
+  }
+}
 
 function generateUUID() {
     var uuid = '';
@@ -66,9 +86,9 @@ function createEffect(callback) {
   function wrappedEffect() {
     // Remove previous subscriptions for this effect
     if (effectFlushers[effectId]) {
-      effectFlushers[effectId].forEach(function(unsubscribe) {
-        unsubscribe();
-      });
+      for (let i = effectFlushers[effectId].length - 1; i >= 0; i--) {
+        effectFlushers[effectId][i]();
+      }
     }
     effectFlushers[effectId] = [];
 
@@ -88,9 +108,9 @@ function createEffect(callback) {
 
         var cleanupCurrentEffect = function() {
                     if (effectFlushers[effectId]) {
-                        effectFlushers[effectId].forEach(function(unsubscribe) {
-                            unsubscribe();
-                        });
+                        for (let i = effectFlushers[effectId].length - 1; i >= 0; i--) {
+                          effectFlushers[effectId][i]();
+                        }
                         delete effectFlushers[effectId];
                     } else {
                         console.log("effectFlushers[", effectId, "] is empty")
@@ -128,7 +148,14 @@ function createElement(tag, attributes) {
           } else {
             (function (key, fn) {
                 createEffect(function() {
-                    element.setAttribute(key, fn());
+                    const value = fn();
+                    if (key === 'style' && typeof value === 'object') {
+                      for (const styleKey in value) {
+                        element.style[styleKey] = value[styleKey];
+                      }
+                    } else {
+                      element.setAttribute(key, value);
+                    }
                 });
             })(key, attributes[key]);
           }
@@ -178,8 +205,15 @@ function createElement(tag, attributes) {
     return element;
   }
 
+
+function onCleanup(callback) {
+  effectFlushers[activeEffectId].push(callback);
+}
+
 export {
   createEffect,
   createSignal,
   createElement,
+  onCleanup,
+  setAll,
 };

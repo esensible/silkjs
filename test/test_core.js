@@ -1,5 +1,5 @@
 import { strictEqual } from 'assert';
-import { createSignal, createEffect } from '../src/index.js';
+import { createSignal, createEffect, onCleanup, setAll } from '../src/index.js';
 
 describe('Test createSignal', () => {
   it('should create a signal with initial value', () => {
@@ -95,5 +95,119 @@ describe('Test multiple effects', () => {
     strictEqual(result2, 23);
     strictEqual(result3, 42);
     strictEqual(result4, 42);
+  });
+});
+
+
+describe('Test onCleanup', () => {
+  it('should call cleanup function when dependencies change', () => {
+    const [state, setState] = createSignal(true);
+    let cleanupCalled = false;
+
+    createEffect(() => {
+      state();
+
+      onCleanup(() => {
+        cleanupCalled = true;
+      });
+    });
+
+    strictEqual(cleanupCalled, false);
+
+    setState(false);
+    strictEqual(cleanupCalled, true);
+  });
+
+  it('should call cleanup function when effect is re-triggered', () => {
+    const [counter, setCounter] = createSignal(0);
+    let cleanupCalls = 0;
+
+    createEffect(() => {
+      counter();
+
+      onCleanup(() => {
+        cleanupCalls++;
+      });
+    });
+
+    strictEqual(cleanupCalls, 0);
+
+    setCounter(42);
+    strictEqual(cleanupCalls, 1);
+  });
+
+  it('should call cleanup function in reverse order', () => {
+    const [counter, setCounter] = createSignal(0);
+    let cleanupOrder = '';
+
+    createEffect(() => {
+      counter();
+
+      onCleanup(() => {
+        cleanupOrder += 'A';
+      });
+
+      onCleanup(() => {
+        cleanupOrder += 'B';
+      });
+    });
+
+    strictEqual(cleanupOrder, '');
+
+    setCounter(42);
+    strictEqual(cleanupOrder, 'BA');
+  });
+});
+
+
+describe('Test setAll', () => {
+  it('should update signals with keys', () => {
+    const [signal1, _1] = createSignal(0, 'signal1');
+    const [signal2, _2] = createSignal(0, 'signal2');
+
+    setAll({ signal1: 42, signal2: 84 });
+
+    strictEqual(signal1(), 42);
+    strictEqual(signal2(), 84);
+  });
+
+  it('should notify effects when signals are updated', () => {
+    const [signal1, _1] = createSignal(0, 'signal3');
+    const [signal2, _2] = createSignal(0, 'signal4');
+    let effect1Result = null;
+    let effect2Result = null;
+
+    createEffect(() => {
+      effect1Result = signal1();
+    });
+
+    createEffect(() => {
+      effect2Result = signal2();
+    });
+
+    setAll({ signal3: 23, signal4: 46 });
+
+    strictEqual(effect1Result, 23);
+    strictEqual(effect2Result, 46);
+  });
+
+  it('should not affect signals without keys', () => {
+    const [signal1, _1] = createSignal(0);
+    const [signal2, _2] = createSignal(0);
+    let effect1Result = null;
+    let effect2Result = null;
+
+    createEffect(() => {
+      effect1Result = signal1();
+    });
+
+    createEffect(() => {
+      effect2Result = signal2();
+    });
+
+    setAll({ signal1: 23, signal2: 46 });
+
+    strictEqual(effect1Result, 0);
+    strictEqual(effect2Result, 0);
   });
 });
