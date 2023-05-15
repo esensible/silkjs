@@ -9,7 +9,7 @@ export function setDocument(value) {
 
 export function jsx(tag, attributes) {
     if (typeof tag === "function") {
-      return function() { return tag.apply(null, arguments); }
+        return function() { return tag(attributes, Array.prototype.slice.call(arguments, 2)); }
     }
   
     var element = docRef.createElement(tag);
