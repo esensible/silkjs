@@ -1,5 +1,6 @@
 import { strictEqual } from './assert.js';
-import { createSignal, jsx, setDocument} from '../src/index.js';
+import { createSignal } from '../src/index.js';
+import { jsx, setDocument } from '../src/jsx-runtime.js';
 import { JSDOM } from 'jsdom';
 
 describe('Test DOM generation', () => {

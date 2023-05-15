@@ -3,12 +3,6 @@ var activeEffectId = null;
 var effectFlushers = {};
 var signalMap = {};
 
-var docRef = typeof document !== "undefined" ? document : null;
-// Dodgy hack for testing under node
-export function setDocument(value) {
-  docRef = value;
-}
-
 function createSignal(initialValue, key) {
   let value = initialValue;
   let subscribers = [];
@@ -131,88 +125,14 @@ function createEffect(callback) {
   return wrappedEffect();
 }
 
-function jsx(tag, attributes) {
-
-    if (typeof tag === "function") {
-        return function() { return tag(attributes, Array.prototype.slice.call(arguments, 2)); }
-    }
-    var element = docRef.createElement(tag);
-  
-    // Set attributes
-    for (var key in attributes) {
-        // hack for on prefix to handle event setting
-        if (typeof attributes[key] === "function") {
-          if (key.indexOf("on") === 0) {
-            var event = key.slice(2).toLowerCase();
-            element.addEventListener(event, attributes[key]);
-          } else {
-            (function (key, fn) {
-                createEffect(function() {
-                    const value = fn();
-                    if (key === 'style' && typeof value === 'object') {
-                      for (const styleKey in value) {
-                        element.style[styleKey] = value[styleKey];
-                      }
-                    } else {
-                      element.setAttribute(key, value);
-                    }
-                });
-            })(key, attributes[key]);
-          }
-        } else if (key === 'style' && typeof attributes[key] === 'object') {
-          const styleObject = attributes[key];
-          for (const styleKey in styleObject) {
-            element.style[styleKey] = styleObject[styleKey];
-          }
-        }
-        else {
-            element.setAttribute(key, attributes[key]);
-        }
-    }
-  
-    // Append children
-    for (var i = 2; i < arguments.length; i++) {
-      var child = arguments[i];
-      if (typeof child === "function") {
-        (function (child, idx) {
-            createEffect(function() {
-                var newValue = child;
-                // This handles nested custom components
-                while (typeof newValue === "function") {
-                  newValue = newValue()
-                }
-                if (typeof newValue === "object") {
-                    if (idx >= element.children.length) {
-                        element.appendChild(newValue);
-                    } else {
-                        var oldValue = element.children[idx];
-                        element.replaceChild(newValue, oldValue);
-                    }
-                } else {
-                    element.textContent = String(newValue);
-                }
-            });
-        })(child, i-2);
-      } else {
-        if (typeof child === "string") {
-          element.appendChild(document.createTextNode(child));
-        } else {
-          element.appendChild(child);
-        }
-      }
-    }
-  
-    return element;
-  }
-
 function onCleanup(callback) {
   effectFlushers[activeEffectId].push(callback);
 }
 
+
 export {
   createEffect,
   createSignal,
-  jsx,
   onCleanup,
   setAll,
 };

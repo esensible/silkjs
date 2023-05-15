@@ -5,7 +5,10 @@
   "description": "Lightweight reactive framework in ES5 for Kindle browsers, inspired by SolidJS.",
   "author": "Andrew Beck",
   "license": "MIT",
-  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./jsx-runtime": "./src/jsx-runtime.js"
+  },
   "scripts": {
     "test": "mocha --require esm \"test/test_*.js\""
   },
