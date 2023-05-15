@@ -20,7 +20,7 @@
 </head>
 <body>
   <script type="module">
-      import { createSignal, createElement} from '../src/index.js';
+      import { createSignal, jsx} from '../src/index.js';
 
       const [fontClass, setFontClass] = createSignal("large-font");
 
@@ -32,17 +32,17 @@
         setFontClass("red-color");
       };
 
-      var app = createElement(
+      var app = jsx(
         "div",
         {},
-        createElement("h1", { class: "center-text" }, "Font Example"),
-        createElement("p", { class: "center-text" }, "Click the buttons below to change the font properties."),
-        createElement("div", { class: "button-container" },
-          createElement("button", { onclick: setLargeFont }, "Large Font"),
-          createElement("button", { onclick: setRedColor }, "Red Color")
+        jsx("h1", { class: "center-text" }, "Font Example"),
+        jsx("p", { class: "center-text" }, "Click the buttons below to change the font properties."),
+        jsx("div", { class: "button-container" },
+          jsx("button", { onclick: setLargeFont }, "Large Font"),
+          jsx("button", { onclick: setRedColor }, "Red Color")
         ),
-        createElement("div", { class: "font-box" },
-        createElement("p", { class: fontClass }, "This text will change based on the selected font property.")
+        jsx("div", { class: "font-box" },
+        jsx("p", { class: fontClass }, "This text will change based on the selected font property.")
         )
       );
 

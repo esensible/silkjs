@@ -4,7 +4,7 @@
 </head>
 <body>
   <script type="module">
-    import { createSignal, createElement} from '../src/index.js';
+    import { createSignal, jsx} from '../src/index.js';
 
     const timeString = () => {
       const currentTime = new Date();
@@ -22,11 +22,11 @@
       setCounter(counter() + 1);
     }, 200);
 
-    const app = createElement(
+    const app = jsx(
       "div",
       {},
-      createElement("h1", {}, () => ("Clock: " + clock())),
-      createElement("h1", {}, () => ("Counter: " + counter()))
+      jsx("h1", {}, () => ("Clock: " + clock())),
+      jsx("h1", {}, () => ("Counter: " + counter()))
     );
 
     document.body.appendChild(app);

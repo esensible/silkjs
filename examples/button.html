@@ -4,7 +4,7 @@
 </head>
 <body>
   <script type="module">
-      import { createSignal, createElement} from '../src/index.js';
+      import { createSignal, jsx} from '../src/index.js';
 
       const [state, setState] = createSignal(false);
 
@@ -12,11 +12,11 @@
 
       const toggle = () => setState(!state());
 
-      const app = createElement(
+      const app = jsx(
         "div",
         {},
-        createElement("h1", {}, buttonPressed),
-        createElement("button", { onclick: toggle }, "Press me")
+        jsx("h1", {}, buttonPressed),
+        jsx("button", { onclick: toggle }, "Press me")
       );
 
       document.body.appendChild(app);

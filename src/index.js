@@ -131,7 +131,7 @@ function createEffect(callback) {
   return wrappedEffect();
 }
 
-function createElement(tag, attributes) {
+function jsx(tag, attributes) {
 
     if (typeof tag === "function") {
         return function() { return tag(attributes, Array.prototype.slice.call(arguments, 2)); }
@@ -205,7 +205,6 @@ function createElement(tag, attributes) {
     return element;
   }
 
-
 function onCleanup(callback) {
   effectFlushers[activeEffectId].push(callback);
 }
@@ -213,7 +212,7 @@ function onCleanup(callback) {
 export {
   createEffect,
   createSignal,
-  createElement,
+  jsx,
   onCleanup,
   setAll,
 };

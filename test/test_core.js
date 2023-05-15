@@ -1,4 +1,4 @@
-import { strictEqual } from 'assert';
+import { strictEqual } from './assert.js';
 import { createSignal, createEffect, onCleanup, setAll } from '../src/index.js';
 
 describe('Test createSignal', () => {
