@@ -1,7 +1,10 @@
-var activeEffect = null;
-var activeEffectId = null;
-var effectFlushers = {};
-var signalMap = {};
+activeEffect = null;
+activeEffectId = null;
+effectFlushers = {};
+signalMap = {};
+
+// handy debug code
+// export var activeSignals = [];
 
 function createSignal(initialValue, key) {
   let value = initialValue;
@@ -10,6 +13,11 @@ function createSignal(initialValue, key) {
   function addSubscriber(subscriber, subscriberId) {
     if (subscribers.indexOf(subscriber) === -1) {
       subscribers.push(subscriber);
+
+      // handy debug code
+      // if (typeof key !== "undefined" && activeSignals.indexOf(key) === -1) {
+      //   activeSignals.push(key);
+      // }
 
       // Add a function to remove this signal from the effect's subscriptions
       if (!effectFlushers[subscriberId]) {

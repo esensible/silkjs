@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.js",
     "./jsx-runtime": "./src/jsx-runtime.js",
+    "./jsx-dev-runtime": "./src/jsx-runtime.js",
     "./babel-presets": "./src/babel-presets.js"
   },
   "scripts": {

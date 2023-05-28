@@ -93,3 +93,5 @@ export function jsx(tag, attributes) {
   
 
 export const jsxs = jsx;
+
+export const jsxDEV = jsx;
