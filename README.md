@@ -1,3 +1,9 @@
+# !! Deprecated !!
+
+The most recent Kindle updates included a relatively decent version of Chromium. My own applications have now ditched silkjs in favour of solidjs, which is actively maintained.
+
+This repo won't receive any further updates. Feel free to fork and go nuts. Go well :)
+
 # SilkJs
 
 SilkJS is client side implementation of [SilkFlow](https://github.com/esensible/silkflow). Both are fine grained reactive libraries targetting the Kindle (specifically the PaperWhite).
